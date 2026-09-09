@@ -115,6 +115,16 @@
         baseMask.height = height;
         baseMask.getContext("2d").putImageData(maskData, 0, 0);
 
+        drawing.guideCanvas.width = width;
+        drawing.guideCanvas.height = height;
+        const guideContext = drawing.guideCanvas.getContext("2d");
+        guideContext.clearRect(0, 0, width, height);
+        guideContext.fillStyle = "#ffd2d9";
+        guideContext.fillRect(0, 0, width, height);
+        guideContext.globalCompositeOperation = "destination-in";
+        guideContext.drawImage(baseMask, 0, 0);
+        guideContext.globalCompositeOperation = "source-over";
+
         const maskContext = drawing.maskCanvas.getContext("2d");
         const tolerance = Math.max(4, Math.round(width * 0.008));
         maskContext.clearRect(0, 0, width, height);
@@ -155,7 +165,7 @@
     };
 
     const renderDrawing = (drawing) => {
-        const { canvas, context, maskCanvas, pixelRatio, strokes } = drawing;
+        const { canvas, context, guideCanvas, maskCanvas, pixelRatio, strokes } = drawing;
         const width = canvas.width / pixelRatio;
         const height = canvas.height / pixelRatio;
 
@@ -166,17 +176,22 @@
             return;
         }
 
-        context.strokeStyle = "#f06b5b";
-        context.fillStyle = "#f06b5b";
+        context.save();
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(guideCanvas, 0, 0, canvas.width, canvas.height);
+        context.restore();
+
+        context.strokeStyle = "#f45e50";
+        context.fillStyle = "#f45e50";
         context.lineCap = "round";
         context.lineJoin = "round";
 
-        const baseWidth = Math.max(7, width * 0.014);
+        const baseWidth = Math.max(14, width * 0.04);
 
         for (const stroke of strokes) {
             if (stroke.length === 1) {
                 const point = stroke[0];
-                const radius = baseWidth * (0.72 + point.pressure * 0.45) / 2;
+                const radius = baseWidth * (0.9 + point.pressure * 0.18) / 2;
                 context.beginPath();
                 context.arc(point.x * width, point.y * height, radius, 0, Math.PI * 2);
                 context.fill();
@@ -189,7 +204,7 @@
                 context.beginPath();
                 context.moveTo(previous.x * width, previous.y * height);
                 context.lineTo(current.x * width, current.y * height);
-                context.lineWidth = baseWidth * (0.72 + current.pressure * 0.45);
+                context.lineWidth = baseWidth * (0.9 + current.pressure * 0.18);
                 context.stroke();
             }
         }
@@ -253,6 +268,7 @@
             canvas,
             context,
             image,
+            guideCanvas: document.createElement("canvas"),
             maskCanvas: document.createElement("canvas"),
             maskReady: false,
             maskPixels: null,

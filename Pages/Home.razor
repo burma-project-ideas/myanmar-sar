@@ -1,0 +1,295 @@
+@page "/"
+@inject IJSRuntime JS
+
+<PageTitle>မြန်မာဗျည်းအက္ခရာ ရေးနည်း | လက်ကလေး</PageTitle>
+
+<a class="skip-link" href="#lesson">စာရေးလေ့ကျင့်ခန်းသို့ သွားမည်</a>
+
+<header class="site-header" aria-label="အဓိက ခေါင်းစီး">
+    <a class="brand" href="#top" aria-label="လက်ကလေး မူလစာမျက်နှာ">
+        <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+                <path d="M13 34.5 16.2 24 31.9 8.3a4.3 4.3 0 0 1 6.1 0l1.7 1.7a4.3 4.3 0 0 1 0 6.1L24 31.8 13 34.5Z" />
+                <path d="m29.5 10.7 7.8 7.8M16.2 24l7.8 7.8M13 34.5l6.1-1.5-4.6-4.6L13 34.5Z" />
+            </svg>
+        </span>
+        <span>လက်ကလေး</span>
+    </a>
+    <a class="guide-link" href="#parent-guide">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-5v-4m0-4h.01" /></svg>
+        မေမေ့လမ်းညွှန်
+    </a>
+</header>
+
+<main id="top">
+    <section class="intro" aria-labelledby="page-heading">
+        <div>
+            <p class="eyebrow">မေမေနဲ့ ကလေး အတူတူ</p>
+            <h1 id="page-heading">မြန်မာဗျည်းအက္ခရာ<br /><span>ရေးကြမယ်</span></h1>
+        </div>
+        <p class="intro-copy">မြှားလေးတွေကို ကြည့်ပြီး တစ်နေ့ <strong>၅ မိနစ်</strong> ဖြည်းဖြည်း လေ့ကျင့်ရအောင်။</p>
+    </section>
+
+    <section class="letter-picker" aria-labelledby="letter-picker-heading">
+        <div class="picker-heading-row">
+            <h2 id="letter-picker-heading">ဗျည်းတစ်လုံး ရွေးပါ</h2>
+            <p><strong>@ToMyanmarNumber(Completed.Count)</strong> / ၃၃ လုံး လေ့ကျင့်ပြီး</p>
+        </div>
+        <div class="letter-ribbon" role="list" aria-label="မြန်မာဗျည်း ၃၃ လုံး">
+            @for (var index = 0; index < Letters.Length; index++)
+            {
+                var letterIndex = index;
+                var letter = Letters[index];
+                var selected = letterIndex == CurrentIndex;
+                var completed = Completed.Contains(letterIndex);
+                <button type="button"
+                        class="letter-button @(selected ? "is-selected" : null) @(completed ? "is-complete" : null)"
+                        aria-label="@letter.Name"
+                        aria-current="@(selected ? "true" : null)"
+                        @onclick="() => SelectLetter(letterIndex)">
+                    <span>@letter.Glyph</span>
+                    @if (completed)
+                    {
+                        <svg class="letter-check" viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10.5 3.2 3L15 6.8" /></svg>
+                    }
+                </button>
+            }
+        </div>
+        <div class="pencil-progress" style="--progress: @ProgressPercent%" role="progressbar" aria-label="လေ့ကျင့်ပြီးသော အက္ခရာ" aria-valuemin="0" aria-valuemax="33" aria-valuenow="@Completed.Count">
+            <span class="eraser" aria-hidden="true"></span>
+            <span class="pencil-fill" aria-hidden="true"></span>
+            <span class="pencil-tip" aria-hidden="true"></span>
+        </div>
+    </section>
+
+    <section id="lesson" class="lesson" aria-labelledby="lesson-heading">
+        <figure class="lesson-paper" @key="CurrentLetter.Glyph">
+            <span class="paper-tab" aria-hidden="true">@CurrentLetter.Glyph</span>
+            <div class="drawing-toolbar">
+                <p>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1 11-11a2.1 2.1 0 0 0 0-3l-.2-.2a2.1 2.1 0 0 0-3 0l-11 11L4 20Zm10.3-13.3 3 3" /></svg>
+                    အနက်ရောင် လမ်းကြောင်းထဲမှာ ရေးပါ
+                </p>
+                <div>
+                    <button type="button" class="canvas-button" @onclick="UndoDrawingAsync" aria-label="နောက်ဆုံးရေးထားတာ ပြန်ဖျက်မယ်">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 8-5 4 5 4v-3h4.5a5.5 5.5 0 0 1 5.2 3.7A7 7 0 0 0 12 7H9V4L4 8" /></svg>
+                        <span>ပြန်ဖျက်</span>
+                    </button>
+                    <button type="button" class="canvas-button clear" @onclick="ClearDrawingAsync" aria-label="ရေးထားတာအားလုံး ရှင်းမယ်">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7 1-3h6l1 3m-9 0h10m-8 0 .6 13h4.8L15 7M11 10v7m2-7v7" /></svg>
+                        <span>အားလုံးရှင်း</span>
+                    </button>
+                </div>
+            </div>
+            <div class="drawing-stage">
+                <img src="@CurrentLetter.ImagePath"
+                     alt="@CurrentLetter.Name ရေးသားပုံနှင့် မြှားပြ လမ်းကြောင်း"
+                     width="1080"
+                     height="960" />
+                <canvas id="practice-canvas"
+                        aria-label="@CurrentLetter.Name ၏ အနက်ရောင်လမ်းကြောင်းအတွင်း လက်ညှိုး၊ စက်ဘောပင် သို့မဟုတ် mouse ဖြင့် လိုက်ရေးရန် နေရာ">
+                    အနက်ရောင် အက္ခရာလမ်းကြောင်းအတွင်း touch၊ စက်ဘောပင်နှင့် mouse ကို အသုံးပြု၍ ရေးနိုင်ပါသည်။
+                </canvas>
+            </div>
+            <figcaption><span class="draw-dot" aria-hidden="true"></span> အနက်ရောင် လမ်းကြောင်းထဲမှာပဲ လိုက်ရေးပါ</figcaption>
+        </figure>
+
+        <div class="lesson-copy" aria-live="polite">
+            <p class="lesson-count">@ToMyanmarNumber(CurrentIndex + 1) / ၃၃</p>
+            <h2 id="lesson-heading"><span>@CurrentLetter.Glyph</span> @CurrentLetter.Name</h2>
+            <p class="lesson-lead">ပုံမှာပါတဲ့ မြှားလေးအတိုင်း လက်ကိုဖြည်းဖြည်းရွှေ့ပါ။ အရင်ဆုံး ကြည့်ပါ၊ ပြီးရင် အတူတူရေးပါ။</p>
+
+            <ol class="practice-steps" aria-label="လေ့ကျင့်ရန် အဆင့်သုံးဆင့်">
+                <li>
+                    <span>၁</span>
+                    <div><strong>ပုံကို အရင်ကြည့်ပါ</strong><small>စမယ့်နေရာလေးကို ကလေးနဲ့အတူ ရှာပါ။</small></div>
+                </li>
+                <li>
+                    <span>၂</span>
+                    <div><strong>လေထဲမှာ ရေးကြည့်ပါ</strong><small>လက်ညှိုးနဲ့ အကြီးကြီး တစ်ခါရေးပါ။</small></div>
+                </li>
+                <li>
+                    <span>၃</span>
+                    <div><strong>စာရွက်ပေါ်မှာ ရေးပါ</strong><small>မြန်မြန်မရေးဘဲ ဖြည်းဖြည်း နှစ်ခါရေးပါ။</small></div>
+                </li>
+            </ol>
+
+            <button type="button"
+                    class="complete-button @(IsCurrentComplete ? "is-done" : null)"
+                    aria-pressed="@IsCurrentComplete"
+                    @onclick="ToggleCurrentAsync">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4L19 7" /></svg>
+                @(IsCurrentComplete ? "လေ့ကျင့်ပြီးပါပြီ" : "လေ့ကျင့်ပြီးပြီလို့ မှတ်မယ်")
+            </button>
+
+            <div class="lesson-actions">
+                <button type="button" class="secondary-button" @onclick="PreviousLetter" disabled="@(CurrentIndex == 0)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+                    ရှေ့တစ်လုံး
+                </button>
+                <button type="button" class="primary-button" @onclick="NextLetter" disabled="@(CurrentIndex == Letters.Length - 1)">
+                    နောက်တစ်လုံး
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="parent-guide" class="parent-guide" aria-labelledby="parent-heading">
+        <div class="parent-intro">
+            <p class="eyebrow">မေမေတို့အတွက်</p>
+            <h2 id="parent-heading">စာရေးချိန်ကို<br /><span>ပျော်စရာလေး</span> ဖြစ်စေပါ</h2>
+            <p>ကလေးရဲ့လက်ကို အတင်းမကိုင်ပါနဲ့။ ပုံကို အတူကြည့်ပြီး သူ့လက်နဲ့သူ စမ်းရေးခိုင်းပါ။</p>
+        </div>
+
+        <div class="parent-tips">
+            <article>
+                <span class="tip-number yellow">၁</span>
+                <div><h3>အရင်ကြည့်</h3><p>အက္ခရာပုံနဲ့ မြှားလေးတွေကို အတူတူကြည့်ပါ။</p></div>
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 24s7-11 20-11 20 11 20 11-7 11-20 11S4 24 4 24Z"/><circle cx="24" cy="24" r="5"/></svg>
+            </article>
+            <article>
+                <span class="tip-number coral">၂</span>
+                <div><h3>လေထဲမှာရေး</h3><p>လက်ညှိုးနဲ့ အကြီးကြီးရေးရင် လမ်းကြောင်းကို မှတ်မိလွယ်ပါတယ်။</p></div>
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M11 36c8-15 9-25 13-25 3 0 2 11 2 15 0-8 1-14 4-14 3 0 1 13 1 13 1-6 2-10 5-9 3 1 0 10 0 10s3-7 6-4c3 3-1 16-11 19-8 2-16-1-20-5Z"/></svg>
+            </article>
+            <article>
+                <span class="tip-number green">၃</span>
+                <div><h3>ရေးပြီး ချီးကျူး</h3><p>လှဖို့ထက် ကြိုးစားတာကို ချီးကျူးပေးပါ။ နှစ်ခါဆို လုံလောက်ပါတယ်။</p></div>
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path d="m10 34 4-13L33 2l9 9-19 19-13 4Z"/><path d="m29 6 9 9M14 21l9 9M10 34l7-2-5-5-2 7Z"/></svg>
+            </article>
+            <p class="five-minute-note"><span aria-hidden="true">☀</span> ဒီနေ့ ၅ မိနစ်ပဲ လေ့ကျင့်ပါ</p>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <a class="brand footer-brand" href="#top"><span class="brand-dot" aria-hidden="true"></span>လက်ကလေး</a>
+    <p>ကလေးတိုင်း မိခင်ဘာသာစကားကို ပျော်ပျော်ရွှင်ရွှင် ရေးတတ်ဖို့။</p>
+</footer>
+
+@code {
+    private static readonly Letter[] Letters =
+    [
+        new("က", "ကကြီး", 1),
+        new("ခ", "ခကွေး", 2),
+        new("ဂ", "ဂငယ်", 3),
+        new("ဃ", "ဃကြီး", 4),
+        new("င", "င", 5),
+        new("စ", "စလုံး", 6),
+        new("ဆ", "ဆလိမ်", 7),
+        new("ဇ", "ဇကွဲ", 8),
+        new("ဈ", "ဈမျဉ်းဆွဲ", 9),
+        new("ည", "ညကြီး", 10),
+        new("ဋ", "ဋသန်လျင်းချိတ်", 11),
+        new("ဌ", "ဌဝမ်းဘဲ", 12),
+        new("ဍ", "ဍရင်ကောက်", 13),
+        new("ဎ", "ဎရေမှုတ်", 14),
+        new("ဏ", "ဏကြီး", 15),
+        new("တ", "တဝမ်းပူ", 16),
+        new("ထ", "ထဆင်ထူး", 17),
+        new("ဒ", "ဒထွေး", 18),
+        new("ဓ", "ဓအောက်ခြိုက်", 19),
+        new("န", "နငယ်", 20),
+        new("ပ", "ပစောက်", 21),
+        new("ဖ", "ဖဦးထုပ်", 22),
+        new("ဗ", "ဗထက်ခြိုက်", 23),
+        new("ဘ", "ဘကုန်း", 24),
+        new("မ", "မ", 25),
+        new("ယ", "ယပက်လက်", 26),
+        new("ရ", "ရကောက်", 27),
+        new("လ", "လငယ်", 28),
+        new("ဝ", "ဝ", 29),
+        new("သ", "သ", 30),
+        new("ဟ", "ဟ", 31),
+        new("ဠ", "ဠကြီး", 32),
+        new("အ", "အ", 33)
+    ];
+
+    private readonly HashSet<int> Completed = [];
+    private bool DrawingNeedsSetup { get; set; } = true;
+    private int CurrentIndex { get; set; }
+    private Letter CurrentLetter => Letters[CurrentIndex];
+    private bool IsCurrentComplete => Completed.Contains(CurrentIndex);
+    private int ProgressPercent => (int)Math.Round(Completed.Count / (double)Letters.Length * 100);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (DrawingNeedsSetup)
+        {
+            DrawingNeedsSetup = false;
+            await JS.InvokeVoidAsync("myanmarZar.drawing.setup", "practice-canvas", CurrentLetter.Glyph);
+        }
+
+        if (firstRender)
+        {
+            var saved = await JS.InvokeAsync<int[]>("myanmarZar.loadCompleted");
+            foreach (var index in saved.Where(index => index >= 0 && index < Letters.Length))
+            {
+                Completed.Add(index);
+            }
+
+            StateHasChanged();
+        }
+    }
+
+    private void SelectLetter(int index)
+    {
+        if (CurrentIndex == index)
+        {
+            return;
+        }
+
+        CurrentIndex = index;
+        DrawingNeedsSetup = true;
+    }
+
+    private void PreviousLetter()
+    {
+        if (CurrentIndex > 0)
+        {
+            CurrentIndex--;
+            DrawingNeedsSetup = true;
+        }
+    }
+
+    private void NextLetter()
+    {
+        if (CurrentIndex < Letters.Length - 1)
+        {
+            CurrentIndex++;
+            DrawingNeedsSetup = true;
+        }
+    }
+
+    private async Task UndoDrawingAsync()
+    {
+        await JS.InvokeVoidAsync("myanmarZar.drawing.undo", CurrentLetter.Glyph);
+    }
+
+    private async Task ClearDrawingAsync()
+    {
+        await JS.InvokeVoidAsync("myanmarZar.drawing.clear", CurrentLetter.Glyph);
+    }
+
+    private async Task ToggleCurrentAsync()
+    {
+        if (!Completed.Add(CurrentIndex))
+        {
+            Completed.Remove(CurrentIndex);
+        }
+
+        await JS.InvokeVoidAsync("myanmarZar.saveCompleted", Completed.Order().ToArray());
+    }
+
+    private static string ToMyanmarNumber(int value)
+    {
+        const string digits = "၀၁၂၃၄၅၆၇၈၉";
+        return string.Concat(value.ToString().Select(character => digits[character - '0']));
+    }
+
+    private sealed record Letter(string Glyph, string Name, int Number)
+    {
+        public string ImagePath => $"images/letters/letter-{Number:D2}.jpg";
+    }
+}

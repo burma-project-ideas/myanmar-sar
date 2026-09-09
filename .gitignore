@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Original imports are copied into MyanmarZar/wwwroot/images/letters with stable names.
 /photo_*.jpg
+
+.vercel
+.env*.local

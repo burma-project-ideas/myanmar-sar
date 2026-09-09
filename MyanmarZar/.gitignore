@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.nupkg
+publish/
+
+# Original imports are copied into wwwroot/images/letters with stable names.
+/photo_*.jpg

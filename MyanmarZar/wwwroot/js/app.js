@@ -3,6 +3,10 @@
     const drawingStates = new Map();
     let activeDrawing = null;
 
+    const stopStrokeGuide = () => {
+        document.querySelector(".stroke-guide")?.classList.add("is-stopped");
+    };
+
     const getDrawingState = (letterKey) => {
         if (!drawingStates.has(letterKey)) {
             drawingStates.set(letterKey, []);
@@ -263,7 +267,7 @@
         }
 
         const context = canvas.getContext("2d", { alpha: true });
-        const image = canvas.previousElementSibling;
+        const image = canvas.closest(".drawing-stage")?.querySelector("img");
         const drawing = {
             canvas,
             context,
@@ -288,6 +292,7 @@
                 return;
             }
 
+            stopStrokeGuide();
             event.preventDefault();
             drawing.pointerId = event.pointerId;
             drawing.currentStroke = [];

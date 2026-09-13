@@ -384,6 +384,17 @@ h1 span::after,
     background: var(--sky);
 }
 
+.canvas-button.guide-button {
+    border-color: rgba(67, 143, 78, 0.35);
+    background: #eef8e9;
+    color: var(--green-deep);
+}
+
+.canvas-button.guide-button:hover {
+    border-color: var(--green-deep);
+    background: #e2f4dc;
+}
+
 .canvas-button.clear {
     color: var(--coral-deep);
 }
@@ -405,6 +416,48 @@ h1 span::after,
     border-radius: 18px;
     object-fit: contain;
     background: white;
+}
+
+.stroke-guide {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    animation: stroke-guide-exit 360ms ease-out var(--guide-exit-delay) 1 forwards;
+}
+
+.stroke-guide.is-stopped {
+    visibility: hidden;
+    opacity: 0;
+    animation: none;
+}
+
+.stroke-guide-halo,
+.stroke-guide-line {
+    fill: none;
+    opacity: 0;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation:
+        stroke-guide-appear 1ms step-end var(--stroke-delay) 1 forwards,
+        stroke-guide-draw var(--stroke-duration) cubic-bezier(0.4, 0, 0.2, 1) var(--stroke-delay) 1 forwards;
+}
+
+.stroke-guide-halo {
+    stroke: rgba(255, 255, 255, 0.92);
+    stroke-width: 2.8;
+}
+
+.stroke-guide-line {
+    stroke: var(--coral-deep);
+    stroke-width: 1.2;
+    filter: drop-shadow(0 1px 1px rgba(32, 49, 74, 0.2));
 }
 
 .drawing-stage canvas {
@@ -784,6 +837,26 @@ footer p {
     to { transform: translateX(18px); }
 }
 
+@keyframes stroke-guide-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes stroke-guide-appear {
+    to { opacity: 1; }
+}
+
+@keyframes stroke-guide-exit {
+    from {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    to {
+        visibility: hidden;
+        opacity: 0;
+    }
+}
+
 @media (max-width: 980px) {
     .intro {
         grid-template-columns: 1fr;
@@ -944,6 +1017,8 @@ footer p {
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
+
+    .stroke-guide { display: none; }
 
     *,
     *::before,

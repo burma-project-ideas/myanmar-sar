@@ -71,6 +71,10 @@
                     ပန်းရောင် လမ်းကြောင်းကို လိုက်ရေးပါ
                 </p>
                 <div>
+                    <button type="button" class="canvas-button guide-button" @onclick="ReplayDirectionGuide" aria-label="မြှားသွားရာလမ်းကြောင်းကို ပြန်ပြမယ်">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" /></svg>
+                        <span>မြှားပြ</span>
+                    </button>
                     <button type="button" class="canvas-button" @onclick="UndoDrawingAsync" aria-label="နောက်ဆုံးရေးထားတာ ပြန်ဖျက်မယ်">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 8-5 4 5 4v-3h4.5a5.5 5.5 0 0 1 5.2 3.7A7 7 0 0 0 12 7H9V4L4 8" /></svg>
                         <span>ပြန်ဖျက်</span>
@@ -86,6 +90,24 @@
                      alt="@CurrentLetter.Name ရေးသားပုံနှင့် မြှားပြ လမ်းကြောင်း"
                      width="1080"
                      height="960" />
+                <svg @key="StrokeGuideReplayKey"
+                     class="stroke-guide"
+                     viewBox="0 0 108 96"
+                     preserveAspectRatio="none"
+                     style="--guide-exit-delay: @(CurrentLetter.GuideExitDelayMs)ms"
+                     aria-hidden="true">
+                    @for (var strokeIndex = 0; strokeIndex < CurrentLetter.StrokeGuides.Length; strokeIndex++)
+                    {
+                        var stroke = CurrentLetter.StrokeGuides[strokeIndex];
+                        var strokeDelayMs = CurrentLetter.GetStrokeDelayMs(strokeIndex);
+                        var strokeStyle = $"--stroke-duration:{stroke.DurationMs}ms;--stroke-delay:{strokeDelayMs}ms";
+
+                        <g transform="@(stroke.KeepFullHeight ? null : "translate(54 56) scale(0.85 0.78) translate(-54 -56)")">
+                            <path class="stroke-guide-halo" d="@stroke.Path" pathLength="1" style="@strokeStyle" />
+                            <path class="stroke-guide-line" d="@stroke.Path" pathLength="1" style="@strokeStyle" />
+                        </g>
+                    }
+                </svg>
                 <canvas id="practice-canvas"
                         aria-label="@CurrentLetter.Name ၏ ပန်းရောင်လမ်းကြောင်းအတွင်း လက်ညှိုး၊ စက်ဘောပင် သို့မဟုတ် mouse ဖြင့် လိုက်ရေးရန် နေရာ">
                     ပန်းရောင် အက္ခရာလမ်းကြောင်းအတွင်း touch၊ စက်ဘောပင်နှင့် mouse ကို အသုံးပြု၍ ရေးနိုင်ပါသည်။
@@ -171,43 +193,44 @@
 @code {
     private static readonly Letter[] Letters =
     [
-        new("က", "ကကြီး", 1),
-        new("ခ", "ခကွေး", 2),
-        new("ဂ", "ဂငယ်", 3),
-        new("ဃ", "ဃကြီး", 4),
-        new("င", "င", 5),
-        new("စ", "စလုံး", 6),
-        new("ဆ", "ဆလိမ်", 7),
-        new("ဇ", "ဇကွဲ", 8),
-        new("ဈ", "ဈမျဉ်းဆွဲ", 9),
-        new("ည", "ညကြီး", 10),
-        new("ဋ", "ဋသန်လျင်းချိတ်", 11),
-        new("ဌ", "ဌဝမ်းဘဲ", 12),
-        new("ဍ", "ဍရင်ကောက်", 13),
-        new("ဎ", "ဎရေမှုတ်", 14),
-        new("ဏ", "ဏကြီး", 15),
-        new("တ", "တဝမ်းပူ", 16),
-        new("ထ", "ထဆင်ထူး", 17),
-        new("ဒ", "ဒထွေး", 18),
-        new("ဓ", "ဓအောက်ခြိုက်", 19),
-        new("န", "နငယ်", 20),
-        new("ပ", "ပစောက်", 21),
-        new("ဖ", "ဖဦးထုပ်", 22),
-        new("ဗ", "ဗထက်ခြိုက်", 23),
-        new("ဘ", "ဘကုန်း", 24),
-        new("မ", "မ", 25),
-        new("ယ", "ယပက်လက်", 26),
-        new("ရ", "ရကောက်", 27),
-        new("လ", "လငယ်", 28),
-        new("ဝ", "ဝ", 29),
-        new("သ", "သ", 30),
-        new("ဟ", "ဟ", 31),
-        new("ဠ", "ဠကြီး", 32),
-        new("အ", "အ", 33)
+        new("က", "ကကြီး", 1, [new("M50 35C44 29 34 30 30 37C26 47 32 55 41 56", 1250), new("M50 35C57 29 68 30 72 37C76 47 69 55 61 56", 1250)]),
+        new("ခ", "ခကွေး", 2, [new("M41 35C46 27 58 29 61 38C65 48 59 55 50 56C43 57 37 53 34 49C38 44 44 44 49 48", 1500)]),
+        new("ဂ", "ဂငယ်", 3, [new("M50 32C42 27 33 31 31 40C28 50 35 56 43 57", 1100), new("M50 32C58 28 64 35 63 43C63 50 58 55 52 57", 1050)]),
+        new("ဃ", "ဃကြီး", 4, [new("M36 34C31 31 29 36 32 39C36 42 32 45 32 49C33 55 40 58 46 55C51 53 53 49 53 45", 1350), new("M52 34C59 27 70 31 73 40C76 49 69 56 61 56C56 56 53 53 51 50", 1250)]),
+        new("င", "င", 5, [new("M61 35C54 28 43 29 38 37C33 46 38 55 47 57C54 58 60 53 63 49", 1450)]),
+        new("စ", "စလုံး", 6, [new("M49 33C59 30 67 37 66 47C65 56 54 59 45 56C37 52 35 41 41 34", 1350), new("M44 36C40 40 40 47 44 51", 750)]),
+        new("ဆ", "ဆလိမ်", 7, [new("M41 35C46 27 58 29 61 38C64 48 59 55 50 56C43 57 37 53 34 49C38 44 44 44 49 48", 1450), new("M59 34C66 28 75 33 76 43C77 51 71 56 64 56C58 56 54 53 52 49", 1150)]),
+        new("ဇ", "ဇကွဲ", 8, [new("M40 36C45 29 57 30 62 37C68 45 64 54 56 57C47 60 37 54 36 46C35 38 41 32 49 32", 1450), new("M49 38C44 38 42 43 44 48C46 53 53 53 56 48C59 44 56 39 51 38", 900), new("M57 46C61 49 64 52 68 48C70 51 72 51 74 49", 750)]),
+        new("ဈ", "ဈမျဉ်းဆွဲ", 9, [new("M49 34C59 30 67 37 66 47C65 56 54 59 45 55C37 51 35 41 40 35", 1350), new("M43 36C39 41 40 48 45 52", 750), new("M70 32L70 74L61 69L61 57", 1200, true)]),
+        new("ည", "ညကြီး", 10, [new("M31 35C37 27 49 30 53 39C57 48 50 56 42 56C36 56 32 53 29 49", 1200), new("M52 34C59 28 69 31 72 40C75 49 69 56 61 56C56 56 53 53 51 50", 1200), new("M29 49L29 72C29 76 32 78 36 78H71V70", 1200, true)]),
+        new("ဋ", "ဋသန်လျင်းချိတ်", 11, [new("M59 34C54 28 43 29 38 37C33 46 38 54 46 56C52 58 59 54 64 50", 1350), new("M38 53C45 60 56 61 64 55L64 74H68", 1150, true)]),
+        new("ဌ", "ဌဝမ်းဘဲ", 12, [new("M59 34C53 29 43 30 39 37C34 45 38 54 47 56C54 58 59 54 63 50", 1300), new("M63 50V68C63 73 59 76 54 75C48 75 45 72 45 68C45 64 48 62 52 62C56 62 59 64 59 67", 1250, true)]),
+        new("ဍ", "ဍရင်ကောက်", 13, [new("M59 34C53 29 43 30 39 37C34 45 38 54 47 56C54 58 59 54 63 50", 1300), new("M38 53C45 60 56 61 64 55L64 74H68", 1150, true)]),
+        new("ဎ", "ဎရေမှုတ်", 14, [new("M58 33C65 41 62 51 54 55C47 58 38 54 36 46C35 40 37 35 41 32", 1350), new("M41 32C46 30 49 34 47 38C45 41 41 43 42 47", 800)]),
+        new("ဏ", "ဏကြီး", 15, [new("M49 33C44 28 35 30 31 37C26 47 33 56 42 56", 1150), new("M50 34C55 28 59 34 57 41L55 52C54 58 47 58 46 52C45 46 48 40 48 36", 1250), new("M58 33C65 28 75 31 78 41C81 50 74 57 66 56C61 56 58 54 56 51", 1200)]),
+        new("တ", "တဝမ်းပူ", 16, [new("M50 34C44 26 32 29 29 39C26 49 33 56 42 56", 1200), new("M50 34C57 26 70 29 73 39C76 49 69 56 61 56", 1200)]),
+        new("ထ", "ထဆင်ထူး", 17, [new("M53 34C47 26 34 29 31 39C28 49 35 56 44 56C53 56 57 48 61 40C65 31 77 29 81 38C85 47 78 56 69 56C62 56 58 52 54 47", 1950)]),
+        new("ဒ", "ဒထွေး", 18, [new("M42 37C46 30 58 31 61 38C63 43 58 47 52 48C59 48 64 52 62 58C59 67 46 68 40 60", 1550)]),
+        new("ဓ", "ဓအောက်ခြိုက်", 19, [new("M50 33C60 30 66 38 65 47C64 56 54 59 45 55C37 51 36 40 42 34", 1350), new("M41 51C46 46 54 45 60 51", 850)]),
+        new("န", "နငယ်", 20, [new("M59 34C51 30 40 30 36 36C42 39 51 38 57 42C64 46 64 53 58 56C50 60 40 55 36 50C41 47 48 48 52 51", 1500), new("M52 50L52 75", 850, true)]),
+        new("ပ", "ပစောက်", 21, [new("M43 34C36 40 37 49 44 54C48 57 51 57 53 56", 1000), new("M59 34C66 41 65 50 58 55C56 56 54 57 52 56", 1000)]),
+        new("ဖ", "ဖဦးထုပ်", 22, [new("M43 34C36 40 37 49 44 54C48 57 51 57 53 56", 1000), new("M52 34C58 38 59 47 54 52", 850), new("M59 34C66 41 65 50 58 55C56 56 54 57 52 56", 1000)]),
+        new("ဗ", "ဗထက်ခြိုက်", 23, [new("M43 34C36 40 37 49 44 54C48 57 51 57 53 56", 1000), new("M45 34C48 41 56 42 59 35", 850), new("M59 34C66 41 65 50 58 55C56 56 54 57 52 56", 1000)]),
+        new("ဘ", "ဘကုန်း", 24, [new("M50 34C44 26 32 29 29 39C26 49 33 56 42 56", 1200), new("M50 34C57 26 70 29 73 39C76 49 69 56 61 56", 1200)]),
+        new("မ", "မ", 25, [new("M43 34C36 40 37 49 44 54C48 57 51 57 53 56", 1000), new("M59 34C66 41 65 50 58 55C56 56 54 57 52 56", 1000), new("M43 53C48 47 56 47 61 53", 850)]),
+        new("ယ", "ယပက်လက်", 26, [new("M36 34C31 31 29 36 32 39C36 42 32 45 32 49C33 55 40 58 46 55C51 53 53 49 53 45", 1350), new("M52 34C59 27 70 31 73 40C76 49 69 56 61 56C56 56 53 53 51 50", 1250)]),
+        new("ရ", "ရကောက်", 27, [new("M45 34C55 29 64 35 64 45C64 54 56 58 48 56C41 54 38 49 39 43", 1250), new("M41 50C46 46 53 47 57 52", 800), new("M64 45V74H69", 900, true)]),
+        new("လ", "လငယ်", 28, [new("M50 34C44 27 32 28 29 38C26 48 33 56 42 56C48 56 52 52 53 47", 1250), new("M57 34C64 27 75 30 77 40C79 49 72 56 64 56C57 56 53 52 53 47", 1250)]),
+        new("ဝ", "ဝ", 29, [new("M50 33C60 30 66 38 65 47C64 56 54 59 45 56C37 53 35 42 40 35C43 31 47 30 50 30", 1500)]),
+        new("သ", "သ", 30, [new("M50 34C44 26 32 29 29 39C26 49 33 56 42 56", 1200), new("M50 34C57 26 70 29 73 39C76 49 69 56 61 56", 1200)]),
+        new("ဟ", "ဟ", 31, [new("M43 34C36 40 37 49 44 54C48 57 51 57 53 56", 1000), new("M53 34C58 29 61 36 58 42C55 48 51 52 53 56", 850), new("M60 34C67 28 76 32 77 42C78 50 72 56 65 56", 1050)]),
+        new("ဠ", "ဠကြီး", 32, [new("M59 34C53 29 43 30 39 37C34 45 38 54 47 56C54 58 59 54 63 50", 1300), new("M38 53C45 60 56 61 64 55V69C64 74 61 77 57 77C52 77 49 74 49 70", 1250, true)]),
+        new("အ", "အ", 33, [new("M32 36C38 30 48 31 50 37C52 43 47 46 42 47C49 47 53 51 51 57C48 64 37 64 32 57", 1400), new("M50 35C57 28 69 31 73 40C76 49 70 57 62 56C57 55 53 52 52 48", 1250), new("M55 52C60 47 67 46 72 50", 750)])
     ];
 
     private readonly HashSet<int> Completed = [];
     private bool DrawingNeedsSetup { get; set; } = true;
+    private int StrokeGuideReplayKey { get; set; }
     private int CurrentIndex { get; set; }
     private Letter CurrentLetter => Letters[CurrentIndex];
     private bool IsCurrentComplete => Completed.Contains(CurrentIndex);
@@ -272,6 +295,11 @@
         await JS.InvokeVoidAsync("myanmarZar.drawing.clear", CurrentLetter.Glyph);
     }
 
+    private void ReplayDirectionGuide()
+    {
+        StrokeGuideReplayKey++;
+    }
+
     private async Task ToggleCurrentAsync()
     {
         if (!Completed.Add(CurrentIndex))
@@ -288,8 +316,17 @@
         return string.Concat(value.ToString().Select(character => digits[character - '0']));
     }
 
-    private sealed record Letter(string Glyph, string Name, int Number)
+    private sealed record StrokeGuide(string Path, int DurationMs, bool KeepFullHeight = false);
+
+    private sealed record Letter(string Glyph, string Name, int Number, StrokeGuide[] StrokeGuides)
     {
+        private const int StrokePauseMs = 220;
+
         public string ImagePath => $"images/letters/letter-{Number:D2}.jpg";
+
+        public int GuideExitDelayMs => StrokeGuides.Sum(stroke => stroke.DurationMs + StrokePauseMs) - StrokePauseMs + 240;
+
+        public int GetStrokeDelayMs(int strokeIndex) =>
+            StrokeGuides.Take(strokeIndex).Sum(stroke => stroke.DurationMs + StrokePauseMs);
     }
 }

@@ -1,6 +1,6 @@
 # လက်ကလေး — မြန်မာဗျည်းအက္ခရာ ရေးလေ့ကျင့်ခန်း
 
-**လက်ကလေး** သည် မိဘနှင့် ကလေးအတူ မြန်မာဗျည်း ၃၃ လုံးကို မြှားပြထားသော ပုံများကြည့်ပြီး လက်ညှိုး၊ stylus သို့မဟုတ် mouse ဖြင့် လိုက်ရေးလေ့ကျင့်နိုင်သည့် .NET 10 Blazor WebAssembly app ဖြစ်သည်။ Backend နှင့် user account မလိုဘဲ browser ထဲတွင်သာ အလုပ်လုပ်သည်။
+**လက်ကလေး** သည် မိဘနှင့် ကလေးအတူ မြန်မာဗျည်း ၃၃ လုံးကို SVG ခဲတံလေး အဆင့်လိုက်ရေးပြသည့် လမ်းကြောင်းကြည့်ပြီး လက်ညှိုး၊ stylus သို့မဟုတ် mouse ဖြင့် လိုက်ရေးလေ့ကျင့်နိုင်သည့် .NET 10 Blazor WebAssembly app ဖြစ်သည်။ Backend နှင့် user account မလိုဘဲ browser ထဲတွင်သာ အလုပ်လုပ်သည်။
 
 ## Overview
 
@@ -9,7 +9,7 @@ App ၏ အဓိကရည်ရွယ်ချက်မှာ ကလေးတ�
 အဓိကလုပ်ဆောင်ချက်များမှာ—
 
 - က မှ အ အထိ မြန်မာဗျည်း ၃၃ လုံး ရွေးချယ်လေ့ကျင့်နိုင်ခြင်း
-- အက္ခရာတစ်လုံးစီအတွက် ရေးသားပုံနှင့် မြှားပြလမ်းကြောင်း ပါရှိခြင်း
+- အက္ခရာတစ်လုံးစီအတွက် stroke နံပါတ်၊ SVG line drawing နှင့် လမ်းအတိုင်းရွေ့သည့် ခဲတံ animation ပါရှိခြင်း
 - Touch, stylus နှင့် mouse input များကို Pointer Events ဖြင့် တစ်မျိုးတည်း ကိုင်တွယ်ခြင်း
 - သတ်မှတ်ထားသော အက္ခရာလမ်းကြောင်းအတွင်း ရေးသည့် stroke ကိုသာ canvas ပေါ်တွင် ပြသခြင်း
 - နောက်ဆုံး stroke ကို ပြန်ဖျက်ခြင်းနှင့် ရေးထားသမျှ အားလုံးရှင်းခြင်း
@@ -21,7 +21,7 @@ App ၏ အဓိကရည်ရွယ်ချက်မှာ ကလေးတ�
 
 1. App ဖွင့်သည့်အခါ ယခင်ပြီးဆုံးထားသော အက္ခရာစာရင်းကို browser မှ ပြန်ဖတ်သည်။
 2. အပေါ်ဘက် အက္ခရာတန်းမှ လေ့ကျင့်လိုသော ဗျည်းကို ရွေးသည်။
-3. ပုံတွင် ပြထားသော မြှားနှင့် ပန်းရောင်လမ်းကြောင်းကို ကြည့်သည်။
+3. Stroke နံပါတ်နှင့် ခဲတံလေး အဆင့်လိုက်ရေးပြသည့် ပန်းရောင်လမ်းကြောင်းကို ကြည့်သည်။
 4. လက်ညှိုး၊ stylus သို့မဟုတ် mouse ဖြင့် အက္ခရာလမ်းကြောင်းအတွင်း လိုက်ရေးသည်။ လမ်းကြောင်းအပြင်ဘက် အပိုင်းများကို canvas က ဖြတ်တောက်ပေးသည်။
 5. လိုအပ်ပါက **ပြန်ဖျက်** ဖြင့် နောက်ဆုံး stroke ကို ဖျက်နိုင်ပြီး **အားလုံးရှင်း** ဖြင့် လက်ရှိအက္ခရာ၏ stroke အားလုံးကို ရှင်းနိုင်သည်။
 6. လေ့ကျင့်ပြီးပါက **လေ့ကျင့်ပြီးပြီလို့ မှတ်မယ်** ကို နှိပ်သည်။ Progress နှင့် အစိမ်းရောင် check mark ကို ချက်ချင်းပြောင်းပြီး browser ထဲတွင် သိမ်းပေးသည်။
@@ -39,19 +39,19 @@ Program.cs ──► App.razor router ──► Pages/Home.razor
                                            │
                    ┌───────────────────────┼────────────────────────┐
                    ▼                       ▼                        ▼
-        letters/letter-NN.jpg       JS interop: drawing      JS interop: progress
-                                            │                        │
-                                            ▼                        ▼
-                                  Canvas + Pointer Events     browser localStorage
+         SVG stroke path data       JS interop: drawing      JS interop: progress
+                   │                        │                        │
+                   └──── visual + mask ────┘                        ▼
+                                   Canvas + Pointer Events    browser localStorage
 ```
 
 အလုပ်လုပ်ပုံအသေးစိတ်မှာ—
 
 1. `Home.razor` က အက္ခရာ ၃၃ လုံး၊ လက်ရှိရွေးထားသော အက္ခရာနှင့် ပြီးဆုံးမှု state ကို ထိန်းသည်။
-2. အက္ခရာရွေးချယ်သည့်အခါ သက်ဆိုင်ရာ `letter-NN.jpg` worksheet ကို ပြပြီး JavaScript drawing setup ကို JS interop ဖြင့် ခေါ်သည်။
-3. `app.js` က worksheet ပုံရှိ မည်းနက်ပြီး အရောင်မစွက်သော အက္ခရာအစိတ်အပိုင်းများကို စစ်ပြီး ရေးနိုင်သည့် mask တည်ဆောက်သည်။ ကလေး၏ လက်ချောင်းအတွက် tolerance အနည်းငယ် ထည့်ပေးထားသည်။
+2. အက္ခရာရွေးချယ်သည့်အခါ သက်ဆိုင်ရာ SVG stroke path များဖြင့် road-track ကိုဆွဲပြီး stroke နံပါတ်၊ line drawing နှင့် moving pencil animation ကို အစဉ်လိုက်ပြသည်။
+3. `app.js` က မြင်ရသည့် SVG path များကို `Path2D` ဖြင့် canvas mask အဖြစ်ပြန်တည်ဆောက်သည်။ ထို့ကြောင့် animation လမ်းကြောင်းနှင့် ကလေးရေးနိုင်သည့်ဧရိယာသည် source တစ်ခုတည်းကိုသုံးသည်။
 4. Pointer coordinates နှင့် pen pressure ကို canvas အရွယ်အစားနှင့်မသက်ဆိုင်သည့် normalized values အဖြစ် သိမ်းသည်။ ထို့ကြောင့် screen resize ဖြစ်သည့်အခါ stroke များကို ပြန်ဆွဲနိုင်သည်။
-5. Stroke များကို အနီရောင်ဖြင့် render လုပ်ပြီး worksheet mask နှင့် clip လုပ်သဖြင့် သတ်မှတ်လမ်းကြောင်းအတွင်း အပိုင်းများသာ မြင်ရသည်။
+5. Stroke များကို အနီရောင်ဖြင့် render လုပ်ပြီး SVG-derived mask နှင့် clip လုပ်သဖြင့် သတ်မှတ်လမ်းကြောင်းအတွင်း အပိုင်းများသာ မြင်ရသည်။
 6. ပြီးဆုံးမှုကို `myanmarzar.completed` key ဖြင့် `localStorage` ထဲ သိမ်းပြီး app ပြန်ဖွင့်သည့်အခါ Blazor state ထဲ ပြန်တင်သည်။
 
 ## နည်းပညာများ
@@ -113,7 +113,7 @@ myanmarzar/
     ├── wwwroot/index.html           # Browser host page
     ├── wwwroot/css/app.css          # Responsive visual design
     ├── wwwroot/js/app.js            # Drawing engine နှင့် localStorage
-    └── wwwroot/images/letters/      # အက္ခရာ worksheet ၃၃ ပုံ
+    └── wwwroot/images/letters/      # ယခင် worksheet reference ပုံများ (runtime မသုံးပါ)
 ```
 
 ## Development Workflow
@@ -125,15 +125,14 @@ myanmarzar/
 | စာမျက်နှာ content, အက္ခရာစာရင်း, navigation, progress | `MyanmarZar/Pages/Home.razor` |
 | Drawing mask, pointer input, undo/clear, browser storage | `MyanmarZar/wwwroot/js/app.js` |
 | Color, spacing, responsive layout, animation | `MyanmarZar/wwwroot/css/app.css` |
-| Worksheet ပုံများ | `MyanmarZar/wwwroot/images/letters/letter-NN.jpg` |
 | App title, metadata, loading/error UI | `MyanmarZar/wwwroot/index.html` |
 
-Worksheet ပုံတစ်ပုံ အစားထိုးရာတွင်—
+အက္ခရာလမ်းကြောင်းတစ်ခု ပြင်ဆင်ရာတွင်—
 
-1. `letter-01.jpg` မှ `letter-33.jpg` naming အတိုင်း မှန်ကန်သော နံပါတ်ဖြင့် ပုံကို ထည့်ပါ။
-2. ရေးရမည့် အက္ခရာလမ်းကို မည်းရောင်/neutral dark color ဖြင့် ထင်ရှားစွာထားပါ။ Drawing mask သည် worksheet pixels မှ လမ်းကြောင်းကို အလိုအလျောက်ဖော်ထုတ်သောကြောင့် guide arrow နှင့် အခြား decoration များကို လမ်းကြောင်းနှင့် အရောင်ကွဲအောင်ထားပါ။
-3. `Home.razor` ရှိ `Letters` entry ၏ နံပါတ်၊ အက္ခရာနှင့် အမည်တို့ကို ပုံနှင့် တိုက်စစ်ပါ။
-4. Mouse သာမက touch/stylus ဖြင့်ပါ လမ်းကြောင်း၊ resize, undo နှင့် clear တို့ကို စမ်းပါ။
+1. `Home.razor` ရှိ သက်ဆိုင်ရာ `Letter` entry ၏ `StrokeGuide` SVG path ကိုပြင်ပါ။
+2. Stroke အစဉ်မှန်အောင် array ထဲရှိ path order နှင့် duration ကိုတိုက်စစ်ပါ။ `KeepFullHeight` ကို descender ရှည်သည့် stroke များအတွက်သာသုံးပါ။
+3. **မြှားပြ** ကိုနှိပ်ပြီး stroke နံပါတ်၊ moving pencil နှင့် line drawing တို့ တစ်လမ်းတည်းတည့်ကြောင်းစစ်ပါ။
+4. Mouse သာမက touch/stylus ဖြင့်ပါ SVG-derived mask၊ resize, undo နှင့် clear တို့ကို စမ်းပါ။
 5. နောက်ဆုံးတွင် Release build ကို run ပြီး compile error မရှိကြောင်း စစ်ပါ။
 
 အက္ခရာအသစ် ထပ်တိုးမည်ဆိုပါက `Letters` စာရင်းအပြင် UI ရှိ `၃၃` count စာသားများနှင့် progress bar ၏ maximum value ကိုပါ တစ်ပြိုင်နက် ပြင်ရန်လိုသည်။
@@ -151,7 +150,7 @@ App တွင် backend database, login သို့မဟုတ် cloud sync 
 ## Verification Checklist
 
 - `dotnet build MyanmarZar.slnx --configuration Release` အောင်မြင်ရမည်။
-- အက္ခရာ ၃၃ လုံးလုံး၏ worksheet ပုံများ မှန်ကန်စွာ ပေါ်ရမည်။
+- အက္ခရာ ၃၃ လုံးလုံး၏ vector road နှင့် stroke animation မှန်ကန်စွာ ပေါ်ရမည်။
 - Touch, stylus နှင့် mouse ဖြင့် drawing ပြုလုပ်နိုင်ရမည်။
 - Undo, clear, ရှေ့/နောက် navigation နှင့် completion toggle အလုပ်လုပ်ရမည်။
 - Page refresh ပြီးနောက် completion progress ပြန်ပေါ်ရမည်။

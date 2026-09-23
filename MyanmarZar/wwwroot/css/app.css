@@ -402,67 +402,177 @@ h1 span::after,
 .drawing-stage {
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(108, 134, 151, 0.18);
     border-radius: 18px;
-    background: white;
+    background:
+        radial-gradient(circle at 17% 16%, rgba(255, 216, 91, 0.14) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 83% 79%, rgba(112, 188, 208, 0.12) 0 2px, transparent 2.5px),
+        #fffef9;
+    background-size: 42px 42px, 52px 52px, auto;
     isolation: isolate;
 }
 
-.drawing-stage img {
+.letter-road {
     position: relative;
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 1.13 / 1;
-    border-radius: 18px;
-    object-fit: contain;
-    background: white;
+    aspect-ratio: 108 / 96;
+    overflow: visible;
 }
 
-.stroke-guide {
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
+.writing-lines path {
+    fill: none;
+    stroke: rgba(112, 188, 208, 0.32);
+    stroke-width: 0.65;
+    stroke-linecap: round;
+    stroke-dasharray: 1 1.6;
+}
+
+.writing-lines .writing-line-mid {
+    stroke: rgba(240, 107, 91, 0.24);
+    stroke-dasharray: none;
+}
+
+.letter-road-shadow,
+.letter-road-surface,
+.letter-road-centre,
+.stroke-guide-halo,
+.stroke-guide-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.letter-road-shadow {
+    stroke: rgba(36, 52, 73, 0.16);
+    stroke-width: 14;
+}
+
+.letter-road-surface {
+    stroke: #ffcbd4;
+    stroke-width: 12.2;
+}
+
+.letter-road-centre {
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 1.15;
+    stroke-dasharray: 2.2 2.7;
+}
+
+.stroke-animation {
     pointer-events: none;
     animation: stroke-guide-exit 360ms ease-out var(--guide-exit-delay) 1 forwards;
 }
 
-.stroke-guide.is-stopped {
-    visibility: hidden;
-    opacity: 0;
-    animation: none;
+.stroke-guide.is-stopped .stroke-animation,
+.stroke-guide.is-stopped .stroke-start {
+    display: none;
 }
 
 .stroke-guide-halo,
 .stroke-guide-line {
-    fill: none;
     opacity: 0;
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    stroke-linecap: round;
-    stroke-linejoin: round;
     animation:
         stroke-guide-appear 1ms step-end var(--stroke-delay) 1 forwards,
         stroke-guide-draw var(--stroke-duration) cubic-bezier(0.4, 0, 0.2, 1) var(--stroke-delay) 1 forwards;
 }
 
 .stroke-guide-halo {
-    stroke: rgba(255, 255, 255, 0.92);
-    stroke-width: 2.8;
+    stroke: rgba(255, 255, 255, 0.94);
+    stroke-width: 5.2;
 }
 
 .stroke-guide-line {
     stroke: var(--coral-deep);
-    stroke-width: 1.2;
+    stroke-width: 2.4;
     filter: drop-shadow(0 1px 1px rgba(32, 49, 74, 0.2));
+}
+
+.stroke-start {
+    opacity: 0;
+    pointer-events: none;
+    animation: stroke-start-cycle var(--stroke-duration) ease-out var(--stroke-delay) 1 both;
+}
+
+.stroke-start-ring {
+    fill: rgba(255, 255, 255, 0.8);
+    stroke: var(--coral-deep);
+    stroke-width: 0.75;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: stroke-start-pulse 720ms ease-out var(--stroke-delay) 1 both;
+}
+
+.stroke-start-dot { fill: var(--coral-deep); }
+
+.stroke-start text {
+    fill: white;
+    font-family: "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+    font-size: 2.7px;
+    font-weight: 900;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.stroke-pencil {
+    opacity: 0;
+    filter: drop-shadow(0 1px 1.2px rgba(36, 52, 73, 0.28));
+    animation: pencil-follow var(--stroke-duration) linear var(--stroke-delay) 1 both;
+}
+
+.stroke-pencil-art {
+    stroke: var(--ink);
+    stroke-width: 0.55;
+    stroke-linejoin: round;
+}
+
+.pencil-body { fill: var(--yellow); }
+.pencil-wood { fill: #f1c89e; }
+.pencil-lead { fill: var(--ink); stroke: none; }
+.pencil-band { fill: none; stroke: var(--coral-deep); stroke-width: 1.35; }
+
+.turn-prompt {
+    position: absolute;
+    right: 50%;
+    bottom: 14px;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: max-content;
+    max-width: calc(100% - 28px);
+    padding: 8px 13px;
+    border: 1px solid rgba(67, 143, 78, 0.24);
+    border-radius: 999px;
+    background: rgba(247, 253, 242, 0.94);
+    box-shadow: 0 8px 24px rgba(36, 52, 73, 0.1);
+    color: var(--green-deep);
+    font-size: clamp(0.7rem, 1.5vw, 0.84rem);
+    font-weight: 850;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(50%, 8px);
+    visibility: hidden;
+    animation: turn-prompt-in 420ms ease-out var(--prompt-delay) 1 forwards;
+}
+
+.turn-prompt span {
+    color: var(--coral-deep);
+    font-size: 0.82em;
+}
+
+.drawing-stage.is-writing .turn-prompt {
+    visibility: hidden;
+    opacity: 0;
+    animation: none;
 }
 
 .drawing-stage canvas {
     position: absolute;
-    z-index: 2;
+    z-index: 3;
     inset: 0;
     display: block;
     width: 100%;
@@ -857,6 +967,37 @@ footer p {
     }
 }
 
+@keyframes stroke-start-cycle {
+    0% { opacity: 0; }
+    5%, 34% { opacity: 1; }
+    58%, 100% { opacity: 0; }
+}
+
+@keyframes stroke-start-pulse {
+    0% { opacity: 0; transform: scale(0.65); }
+    32% { opacity: 1; transform: scale(1.2); }
+    68%, 100% { opacity: 0.35; transform: scale(1); }
+}
+
+@keyframes pencil-follow {
+    0%, 100% { opacity: 0; }
+    4%, 92% { opacity: 1; }
+}
+
+@keyframes turn-prompt-in {
+    from {
+        visibility: visible;
+        opacity: 0;
+        transform: translate(50%, 8px);
+    }
+
+    to {
+        visibility: visible;
+        opacity: 1;
+        transform: translate(50%, 0);
+    }
+}
+
 @media (max-width: 980px) {
     .intro {
         grid-template-columns: 1fr;
@@ -1018,7 +1159,14 @@ footer p {
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
 
-    .stroke-guide { display: none; }
+    .stroke-animation,
+    .stroke-start { display: none; }
+
+    .turn-prompt {
+        visibility: visible;
+        opacity: 1;
+        transform: translate(50%, 0);
+    }
 
     *,
     *::before,

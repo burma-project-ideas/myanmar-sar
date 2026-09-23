@@ -86,28 +86,75 @@
                 </div>
             </div>
             <div class="drawing-stage">
-                <img src="@CurrentLetter.ImagePath"
-                     alt="@CurrentLetter.Name ရေးသားပုံနှင့် မြှားပြ လမ်းကြောင်း"
-                     width="1080"
-                     height="960" />
                 <svg @key="StrokeGuideReplayKey"
-                     class="stroke-guide"
+                     class="letter-road stroke-guide"
                      viewBox="0 0 108 96"
                      preserveAspectRatio="none"
                      style="--guide-exit-delay: @(CurrentLetter.GuideExitDelayMs)ms"
                      aria-hidden="true">
+                    <defs>
+                        <filter id="road-shadow-@CurrentLetter.Number" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="1.2" stdDeviation="1.15" flood-color="#243449" flood-opacity="0.14" />
+                        </filter>
+                    </defs>
+
+                    <g class="writing-lines">
+                        <path d="M8 24H100" />
+                        <path class="writing-line-mid" d="M8 48H100" />
+                        <path d="M8 72H100" />
+                    </g>
+
                     @for (var strokeIndex = 0; strokeIndex < CurrentLetter.StrokeGuides.Length; strokeIndex++)
                     {
                         var stroke = CurrentLetter.StrokeGuides[strokeIndex];
                         var strokeDelayMs = CurrentLetter.GetStrokeDelayMs(strokeIndex);
                         var strokeStyle = $"--stroke-duration:{stroke.DurationMs}ms;--stroke-delay:{strokeDelayMs}ms";
+                        var strokeTransform = stroke.KeepFullHeight ? null : "translate(54 56) scale(0.85 0.78) translate(-54 -56)";
 
-                        <g transform="@(stroke.KeepFullHeight ? null : "translate(54 56) scale(0.85 0.78) translate(-54 -56)")">
-                            <path class="stroke-guide-halo" d="@stroke.Path" pathLength="1" style="@strokeStyle" />
-                            <path class="stroke-guide-line" d="@stroke.Path" pathLength="1" style="@strokeStyle" />
+                        <g class="letter-road-stroke" transform="@strokeTransform">
+                            <path class="letter-road-shadow" d="@stroke.Path" filter="url(#road-shadow-@CurrentLetter.Number)" />
+                            <path class="letter-road-surface"
+                                  d="@stroke.Path"
+                                  data-road-path
+                                  data-full-height="@stroke.KeepFullHeight.ToString().ToLowerInvariant()" />
+                            <path class="letter-road-centre" d="@stroke.Path" />
+
+                            <g class="stroke-start" transform="translate(@stroke.Start.X @stroke.Start.Y)" style="@strokeStyle">
+                                <circle class="stroke-start-ring" r="4.2" />
+                                <circle class="stroke-start-dot" r="2.7" />
+                                <text x="0" y="0.25">@ToMyanmarNumber(strokeIndex + 1)</text>
+                            </g>
+
+                            <g class="stroke-animation" style="@strokeStyle">
+                                <path class="stroke-guide-halo" d="@stroke.Path" pathLength="1" />
+                                <path class="stroke-guide-line" d="@stroke.Path" pathLength="1" />
+
+                                <g class="stroke-pencil">
+                                    <g class="stroke-pencil-art" transform="translate(-1.5 -1.9)">
+                                        <path class="pencil-body" d="M-6-2.1H1.7L5.2 0 1.7 2.1H-6Z" />
+                                        <path class="pencil-wood" d="M1.7-2.1 5.2 0 1.7 2.1Z" />
+                                        <path class="pencil-lead" d="m4.15-.65 1.05.65-1.05.65Z" />
+                                        <path class="pencil-band" d="M-4.7-2.1v4.2" />
+                                    </g>
+                                    <animateMotion path="@stroke.Path"
+                                                   begin="@(strokeDelayMs)ms"
+                                                   dur="@(stroke.DurationMs)ms"
+                                                   calcMode="spline"
+                                                   keyTimes="0;1"
+                                                   keySplines="0.4 0 0.2 1"
+                                                   rotate="auto"
+                                                   fill="freeze" />
+                                </g>
+                            </g>
                         </g>
                     }
                 </svg>
+                <div @key="CurrentLetter.Glyph + StrokeGuideReplayKey.ToString()"
+                     class="turn-prompt"
+                     style="--prompt-delay: @(CurrentLetter.GuideExitDelayMs)ms"
+                     aria-hidden="true">
+                    <span>✦</span> အခု ကိုယ်တိုင်ရေးကြည့်မယ်
+                </div>
                 <canvas id="practice-canvas"
                         aria-label="@CurrentLetter.Name ၏ ပန်းရောင်လမ်းကြောင်းအတွင်း လက်ညှိုး၊ စက်ဘောပင် သို့မဟုတ် mouse ဖြင့် လိုက်ရေးရန် နေရာ">
                     ပန်းရောင် အက္ခရာလမ်းကြောင်းအတွင်း touch၊ စက်ဘောပင်နှင့် mouse ကို အသုံးပြု၍ ရေးနိုင်ပါသည်။
@@ -119,12 +166,12 @@
         <div class="lesson-copy" aria-live="polite">
             <p class="lesson-count">@ToMyanmarNumber(CurrentIndex + 1) / ၃၃</p>
             <h2 id="lesson-heading"><span>@CurrentLetter.Glyph</span> @CurrentLetter.Name</h2>
-            <p class="lesson-lead">ပုံမှာပါတဲ့ မြှားလေးအတိုင်း လက်ကိုဖြည်းဖြည်းရွှေ့ပါ။ အရင်ဆုံး ကြည့်ပါ၊ ပြီးရင် အတူတူရေးပါ။</p>
+            <p class="lesson-lead">ခဲတံလေး ရေးပြသွားတဲ့လမ်းအတိုင်း လက်ကိုဖြည်းဖြည်းရွှေ့ပါ။ အရင်ဆုံး ကြည့်ပါ၊ ပြီးရင် အတူတူရေးပါ။</p>
 
             <ol class="practice-steps" aria-label="လေ့ကျင့်ရန် အဆင့်သုံးဆင့်">
                 <li>
                     <span>၁</span>
-                    <div><strong>ပုံကို အရင်ကြည့်ပါ</strong><small>စမယ့်နေရာလေးကို ကလေးနဲ့အတူ ရှာပါ။</small></div>
+                    <div><strong>ရေးပြတာကို အရင်ကြည့်ပါ</strong><small>နံပါတ်ပါတဲ့ စမှတ်လေးကို ကလေးနဲ့အတူ ရှာပါ။</small></div>
                 </li>
                 <li>
                     <span>၂</span>
@@ -161,13 +208,13 @@
         <div class="parent-intro">
             <p class="eyebrow">မေမေတို့အတွက်</p>
             <h2 id="parent-heading">စာရေးချိန်ကို<br /><span>ပျော်စရာလေး</span> ဖြစ်စေပါ</h2>
-            <p>ကလေးရဲ့လက်ကို အတင်းမကိုင်ပါနဲ့။ ပုံကို အတူကြည့်ပြီး သူ့လက်နဲ့သူ စမ်းရေးခိုင်းပါ။</p>
+            <p>ကလေးရဲ့လက်ကို အတင်းမကိုင်ပါနဲ့။ ခဲတံလေး ရေးပြတာကို အတူကြည့်ပြီး သူ့လက်နဲ့သူ စမ်းရေးခိုင်းပါ။</p>
         </div>
 
         <div class="parent-tips">
             <article>
                 <span class="tip-number yellow">၁</span>
-                <div><h3>အရင်ကြည့်</h3><p>အက္ခရာပုံနဲ့ မြှားလေးတွေကို အတူတူကြည့်ပါ။</p></div>
+                <div><h3>အရင်ကြည့်</h3><p>ခဲတံလေး ရွေ့သွားတဲ့ အက္ခရာလမ်းကို အတူတူကြည့်ပါ။</p></div>
                 <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 24s7-11 20-11 20 11 20 11-7 11-20 11S4 24 4 24Z"/><circle cx="24" cy="24" r="5"/></svg>
             </article>
             <article>
@@ -295,8 +342,9 @@
         await JS.InvokeVoidAsync("myanmarZar.drawing.clear", CurrentLetter.Glyph);
     }
 
-    private void ReplayDirectionGuide()
+    private async Task ReplayDirectionGuide()
     {
+        await JS.InvokeVoidAsync("myanmarZar.drawing.replayGuide");
         StrokeGuideReplayKey++;
     }
 
@@ -316,13 +364,32 @@
         return string.Concat(value.ToString().Select(character => digits[character - '0']));
     }
 
-    private sealed record StrokeGuide(string Path, int DurationMs, bool KeepFullHeight = false);
+    private sealed record StrokeGuide(string Path, int DurationMs, bool KeepFullHeight = false)
+    {
+        public SvgPoint Start => ParsePathStart(Path);
+
+        private static SvgPoint ParsePathStart(string path)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(
+                path,
+                @"^M\s*(?<x>-?(?:\d+\.?\d*|\.\d+))[\s,]+(?<y>-?(?:\d+\.?\d*|\.\d+))");
+
+            if (!match.Success)
+            {
+                return new SvgPoint(54, 48);
+            }
+
+            return new SvgPoint(
+                double.Parse(match.Groups["x"].Value, System.Globalization.CultureInfo.InvariantCulture),
+                double.Parse(match.Groups["y"].Value, System.Globalization.CultureInfo.InvariantCulture));
+        }
+    }
+
+    private readonly record struct SvgPoint(double X, double Y);
 
     private sealed record Letter(string Glyph, string Name, int Number, StrokeGuide[] StrokeGuides)
     {
         private const int StrokePauseMs = 220;
-
-        public string ImagePath => $"images/letters/letter-{Number:D2}.jpg";
 
         public int GuideExitDelayMs => StrokeGuides.Sum(stroke => stroke.DurationMs + StrokePauseMs) - StrokePauseMs + 240;
 

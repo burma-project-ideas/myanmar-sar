@@ -4,7 +4,9 @@
     let activeDrawing = null;
 
     const stopStrokeGuide = () => {
-        document.querySelector(".stroke-guide")?.classList.add("is-stopped");
+        const stage = activeDrawing?.stage ?? document.querySelector(".drawing-stage");
+        stage?.querySelector(".stroke-guide")?.classList.add("is-stopped");
+        stage?.classList.add("is-writing");
     };
 
     const getDrawingState = (letterKey) => {
@@ -33,119 +35,33 @@
         drawing.maskCanvas.width = width;
         drawing.maskCanvas.height = height;
 
-        if (!drawing.image?.complete || drawing.image.naturalWidth === 0) {
+        if (drawing.roadPaths.length === 0) {
             return;
         }
 
-        const sampleCanvas = document.createElement("canvas");
-        sampleCanvas.width = width;
-        sampleCanvas.height = height;
-        const sampleContext = sampleCanvas.getContext("2d", { willReadFrequently: true });
-        sampleContext.drawImage(drawing.image, 0, 0, width, height);
-
-        const source = sampleContext.getImageData(0, 0, width, height);
-        const pixelCount = width * height;
-        const darkPixels = new Uint8Array(pixelCount);
-
-        for (let pixel = 0; pixel < pixelCount; pixel++) {
-            const offset = pixel * 4;
-            const red = source.data[offset];
-            const green = source.data[offset + 1];
-            const blue = source.data[offset + 2];
-            const brightness = red * 0.299 + green * 0.587 + blue * 0.114;
-            const colorSpread = Math.max(red, green, blue) - Math.min(red, green, blue);
-
-            // The worksheets use a neutral black letter road and saturated guide lines.
-            darkPixels[pixel] = brightness < 145 && colorSpread < 58 ? 1 : 0;
-        }
-
-        const labels = new Int32Array(pixelCount);
-        const queue = new Int32Array(pixelCount);
-        const componentSizes = [0];
-        let label = 0;
-        let largestComponent = 0;
-
-        for (let start = 0; start < pixelCount; start++) {
-            if (!darkPixels[start] || labels[start] !== 0) {
-                continue;
-            }
-
-            label++;
-            let head = 0;
-            let tail = 0;
-            let componentSize = 0;
-            queue[tail++] = start;
-            labels[start] = label;
-
-            while (head < tail) {
-                const pixel = queue[head++];
-                const x = pixel % width;
-                componentSize++;
-
-                const neighbours = [
-                    x > 0 ? pixel - 1 : -1,
-                    x < width - 1 ? pixel + 1 : -1,
-                    pixel >= width ? pixel - width : -1,
-                    pixel < pixelCount - width ? pixel + width : -1
-                ];
-
-                for (const neighbour of neighbours) {
-                    if (neighbour >= 0 && darkPixels[neighbour] && labels[neighbour] === 0) {
-                        labels[neighbour] = label;
-                        queue[tail++] = neighbour;
-                    }
-                }
-            }
-
-            componentSizes[label] = componentSize;
-            largestComponent = Math.max(largestComponent, componentSize);
-        }
-
-        const minimumComponentSize = Math.max(pixelCount * 0.0007, largestComponent * 0.055);
-        const maskData = sampleContext.createImageData(width, height);
-
-        for (let pixel = 0; pixel < pixelCount; pixel++) {
-            if (componentSizes[labels[pixel]] >= minimumComponentSize) {
-                const offset = pixel * 4;
-                maskData.data[offset] = 255;
-                maskData.data[offset + 1] = 255;
-                maskData.data[offset + 2] = 255;
-                maskData.data[offset + 3] = 255;
-            }
-        }
-
-        const baseMask = document.createElement("canvas");
-        baseMask.width = width;
-        baseMask.height = height;
-        baseMask.getContext("2d").putImageData(maskData, 0, 0);
-
-        drawing.guideCanvas.width = width;
-        drawing.guideCanvas.height = height;
-        const guideContext = drawing.guideCanvas.getContext("2d");
-        guideContext.clearRect(0, 0, width, height);
-        guideContext.fillStyle = "#ffd2d9";
-        guideContext.fillRect(0, 0, width, height);
-        guideContext.globalCompositeOperation = "destination-in";
-        guideContext.drawImage(baseMask, 0, 0);
-        guideContext.globalCompositeOperation = "source-over";
-
         const maskContext = drawing.maskCanvas.getContext("2d");
-        const tolerance = Math.max(4, Math.round(width * 0.008));
+        maskContext.setTransform(1, 0, 0, 1, 0, 0);
         maskContext.clearRect(0, 0, width, height);
-        maskContext.drawImage(baseMask, 0, 0);
+        maskContext.scale(width / 108, height / 96);
+        maskContext.strokeStyle = "#fff";
+        maskContext.lineWidth = 14.4;
+        maskContext.lineCap = "round";
+        maskContext.lineJoin = "round";
 
-        // Include the worksheet's white centre line and give a child's finger a little tolerance.
-        for (const radius of [tolerance * 0.5, tolerance]) {
-            for (let step = 0; step < 24; step++) {
-                const angle = step * Math.PI * 2 / 24;
-                maskContext.drawImage(
-                    baseMask,
-                    Math.round(Math.cos(angle) * radius),
-                    Math.round(Math.sin(angle) * radius)
-                );
+        for (const road of drawing.roadPaths) {
+            maskContext.save();
+
+            if (!road.keepFullHeight) {
+                maskContext.translate(54, 56);
+                maskContext.scale(0.85, 0.78);
+                maskContext.translate(-54, -56);
             }
+
+            maskContext.stroke(new Path2D(road.path));
+            maskContext.restore();
         }
 
+        maskContext.setTransform(1, 0, 0, 1, 0, 0);
         const expandedMask = maskContext.getImageData(0, 0, width, height).data;
         drawing.maskPixels = new Uint8Array(width * height);
         drawing.maskWidth = width;
@@ -169,7 +85,7 @@
     };
 
     const renderDrawing = (drawing) => {
-        const { canvas, context, guideCanvas, maskCanvas, pixelRatio, strokes } = drawing;
+        const { canvas, context, maskCanvas, pixelRatio, strokes } = drawing;
         const width = canvas.width / pixelRatio;
         const height = canvas.height / pixelRatio;
 
@@ -180,17 +96,12 @@
             return;
         }
 
-        context.save();
-        context.setTransform(1, 0, 0, 1, 0, 0);
-        context.drawImage(guideCanvas, 0, 0, canvas.width, canvas.height);
-        context.restore();
-
         context.strokeStyle = "#f45e50";
         context.fillStyle = "#f45e50";
         context.lineCap = "round";
         context.lineJoin = "round";
 
-        const baseWidth = Math.max(14, width * 0.04);
+        const baseWidth = Math.max(16, width * 0.072);
 
         for (const stroke of strokes) {
             if (stroke.length === 1) {
@@ -258,7 +169,7 @@
         }
     };
 
-    const setupDrawing = async (canvasId, letterKey) => {
+    const setupDrawing = (canvasId, letterKey) => {
         activeDrawing?.cleanup();
 
         const canvas = document.getElementById(canvasId);
@@ -267,12 +178,18 @@
         }
 
         const context = canvas.getContext("2d", { alpha: true });
-        const image = canvas.closest(".drawing-stage")?.querySelector("img");
+        const stage = canvas.closest(".drawing-stage");
+        const roadPaths = [...(stage?.querySelectorAll("[data-road-path]") ?? [])]
+            .map((path) => ({
+                path: path.getAttribute("d"),
+                keepFullHeight: path.dataset.fullHeight === "true"
+            }))
+            .filter((road) => road.path);
         const drawing = {
             canvas,
             context,
-            image,
-            guideCanvas: document.createElement("canvas"),
+            stage,
+            roadPaths,
             maskCanvas: document.createElement("canvas"),
             maskReady: false,
             maskPixels: null,
@@ -362,18 +279,6 @@
 
         activeDrawing = drawing;
         resizeDrawing(drawing);
-
-        if (!image?.complete || image.naturalWidth === 0) {
-            try {
-                await image?.decode();
-            } catch {
-                // A failed image cannot expose a safe drawing road, so the canvas stays blank.
-            }
-
-            if (activeDrawing === drawing && image?.naturalWidth > 0) {
-                resizeDrawing(drawing, true);
-            }
-        }
     };
 
     globalThis.myanmarZar = {
@@ -394,6 +299,7 @@
         },
         drawing: {
             setup: setupDrawing,
+            replayGuide: () => activeDrawing?.stage?.classList.remove("is-writing"),
             undo: () => {
                 if (!activeDrawing || activeDrawing.strokes.length === 0) {
                     return;

@@ -175,8 +175,10 @@ App implementation: [Sann Lynn Htun](https://github.com/sannlynnhtun-coding)။ 
 
 ## UI Design Update
 
-လက်ရှိ Interface က [Untitled UI](https://www.untitledui.com/react/components) ရဲ့ Form၊ Card၊ Table၊ Badge နဲ့ Page Header Visual Patterns ကို **Blazor နဲ့ ပြန်လည်ဖန်တီးထားတာ** ပါ။ React Component Package ကို သုံးထားတာ မဟုတ်ပါဘူး။ White/Gray Surfaces၊ Restrained Purple Accent၊ Visible Focus နဲ့ Responsive Layout ကို အသုံးပြုထားပါတယ်။ မူရင်း App Data၊ Calculation နဲ့ Browser Storage Keys တွေကို ဆက်လက်ထိန်းသိမ်းထားပါတယ်။ Myanmar စာအတွက် Self-hosted Padauk Font ကို သုံးပြီး Font Notice ကို `wwwroot/fonts/OFL-Padauk.txt` မှာ ထိန်းသိမ်းထားပါတယ်။
+The current interface follows [PrebuiltUI](https://prebuiltui.com/)'s visual direction: spacious white surfaces, subtle grid backgrounds, gradient headings, rounded cards, and pill controls. These patterns are implemented with CSS and native Blazor components; no React migration or new UI dependency is required. The earlier shared Blazor foundation remains in place.
 
-![Redesigned desktop interface](screenshots/redesign-desktop.jpg)
+The redesign preserves application data, calculations, and browser storage keys. Responsive layouts and visible keyboard focus remain available. Myanmar text uses the self-hosted Padauk font; its license is retained in `wwwroot/fonts/OFL-Padauk.txt`.
+
+![PrebuiltUI-inspired desktop interface](screenshots/redesign-desktop.jpg)
 
 [Mobile preview](screenshots/redesign-mobile.jpg)

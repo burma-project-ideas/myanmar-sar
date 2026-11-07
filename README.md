@@ -1,5 +1,7 @@
 # Myanmar Sar — လက်ကလေး (မြန်မာဗျည်းရေးလေ့ကျင့်ခန်း)
 
+[Public Source Repository](https://github.com/burma-project-ideas/myanmar-sar) · [Live App](https://myanmarzar.vercel.app/)
+
 [Burma Project Ideas](https://github.com/burma-project-ideas) အောက်မှာ နောက်လာမယ့်သူတွေ App Flow နဲ့ Data ကို လေ့လာပြီး ကိုယ်နှစ်သက်တဲ့ Programming Language နဲ့ ပြန်ရေးကြည့်နိုင်ဖို့ ထားပေးထားတဲ့ Project ပါ။ Organization ဆီ ပြောင်းရွှေ့ထားခြင်းက မူရင်း Creator နဲ့ Data Source Credit ကို အစားထိုးခြင်း မဟုတ်ပါဘူး။
 
 [App ကို ဒီမှာ ဖွင့်နိုင်ပါတယ်](https://myanmarzar.vercel.app/)။ Repository အမည်ပြောင်းပေမယ့် Live Domain ကို မပြောင်းထားပါဘူး။

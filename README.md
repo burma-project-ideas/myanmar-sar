@@ -1,4 +1,8 @@
-# လက်ကလေး — မြန်မာဗျည်းအက္ခရာ ရေးလေ့ကျင့်ခန်း
+# Myanmar Sar — လက်ကလေး (မြန်မာဗျည်းရေးလေ့ကျင့်ခန်း)
+
+[Burma Project Ideas](https://github.com/burma-project-ideas) အောက်မှာ နောက်လာမယ့်သူတွေ App Flow နဲ့ Data ကို လေ့လာပြီး ကိုယ်နှစ်သက်တဲ့ Programming Language နဲ့ ပြန်ရေးကြည့်နိုင်ဖို့ ထားပေးထားတဲ့ Project ပါ။ Organization ဆီ ပြောင်းရွှေ့ထားခြင်းက မူရင်း Creator နဲ့ Data Source Credit ကို အစားထိုးခြင်း မဟုတ်ပါဘူး။
+
+[App ကို ဒီမှာ ဖွင့်နိုင်ပါတယ်](https://myanmarzar.vercel.app/)။ Repository အမည်ပြောင်းပေမယ့် Live Domain ကို မပြောင်းထားပါဘူး။
 
 **လက်ကလေး** သည် မိဘနှင့် ကလေးအတူ မြန်မာဗျည်း ၃၃ လုံး၏ မူရင်းရေးနည်းပုံနှင့် မြှားလမ်းကြောင်းကို ကြည့်ပြီး လက်ညှိုး၊ stylus သို့မဟုတ် mouse ဖြင့် လိုက်ရေးလေ့ကျင့်နိုင်သည့် .NET 10 Blazor WebAssembly app ဖြစ်သည်။ Backend နှင့် user account မလိုဘဲ browser ထဲတွင်သာ အလုပ်လုပ်သည်။
 
@@ -17,7 +21,7 @@ App ၏ အဓိကရည်ရွယ်ချက်မှာ ကလေးတ�
 - ပြီးဆုံးထားသော အက္ခရာများကို browser `localStorage` တွင် မှတ်သားထားခြင်း
 - ဖုန်း၊ tablet နှင့် desktop အရွယ်အစားများအတွက် responsive layout နှင့် accessibility support ပါရှိခြင်း
 
-## အသုံးပြုသူ Workflow
+## အသုံးပြုပုံ
 
 1. App ဖွင့်သည့်အခါ ယခင်ပြီးဆုံးထားသော အက္ခရာစာရင်းကို browser မှ ပြန်ဖတ်သည်။
 2. အပေါ်ဘက် အက္ခရာတန်းမှ လေ့ကျင့်လိုသော ဗျည်းကို ရွေးသည်။
@@ -29,7 +33,7 @@ App ၏ အဓိကရည်ရွယ်ချက်မှာ ကလေးတ�
 
 > ပြီးဆုံးမှု progress သည် page ပြန်ဖွင့်သော်လည်း မပျောက်ပါ။ ရေးထားသော canvas stroke များသည် လက်ရှိ page session အတွင်း အက္ခရာပြောင်းပြီး ပြန်လာသည့်အခါသာ ရှိနေပြီး page refresh သို့မဟုတ် tab ပိတ်ပြီးနောက် ပျောက်သွားမည်။
 
-## System Workflow
+## App ရဲ့ Workflow
 
 ```text
 wwwroot/index.html
@@ -63,7 +67,7 @@ Program.cs ──► App.razor router ──► Pages/Home.razor
 - JavaScript interop နှင့် browser `localStorage`
 - Responsive CSS နှင့် reduced-motion, keyboard focus, ARIA support
 
-## စတင်အသုံးပြုခြင်း
+## Local မှာ Run မယ်
 
 လိုအပ်ချက်များ—
 
@@ -99,10 +103,10 @@ dotnet publish MyanmarZar/MyanmarZar.csproj --configuration Release
 
 Publish ပြီးသော static site files များကို `MyanmarZar/bin/Release/net10.0/publish/wwwroot/` တွင် ရရှိမည်။ ထို folder ကို static web host တစ်ခုသို့ deploy လုပ်နိုင်သည်။
 
-## Project Structure
+## Project ဖွဲ့စည်းပုံ
 
 ```text
-myanmarzar/
+myanmar-sar/
 ├── MyanmarZar.slnx
 ├── README.md
 └── MyanmarZar/
@@ -116,7 +120,7 @@ myanmarzar/
     └── wwwroot/images/letters/      # အက္ခရာ ၃၃ လုံး၏ မူရင်း worksheet ရေးနည်းပုံများ
 ```
 
-## Development Workflow
+## Local မှာ Run မယ် Workflow
 
 ပုံမှန်ပြင်ဆင်မှုအလိုက် အဓိက file များမှာ—
 
@@ -147,7 +151,7 @@ myanmarzar/
 
 App တွင် backend database, login သို့မဟုတ် cloud sync မရှိသဖြင့် completion data သည် အသုံးပြုနေသော browser နှင့် origin တစ်ခုတည်းတွင်သာ ရှိသည်။ Private browsing သို့မဟုတ် storage ပိတ်ထားသော environment တွင် lesson ကို ဆက်သုံးနိုင်သော်လည်း progress ကို နောက်တစ်ကြိမ်အတွက် သိမ်းနိုင်မည်မဟုတ်ပါ။
 
-## Verification Checklist
+## စစ်ဆေးမယ်
 
 - `dotnet build MyanmarZar.slnx --configuration Release` အောင်မြင်ရမည်။
 - အက္ခရာ ၃၃ လုံးလုံး၏ worksheet ရေးနည်းပုံ၊ စမှတ်နှင့် မြှားများ မှန်ကန်စွာ ပေါ်ရမည်။
@@ -157,3 +161,12 @@ App တွင် backend database, login သို့မဟုတ် cloud sync 
 - Mobile နှင့် desktop အရွယ်အစားနှစ်မျိုးလုံးတွင် အသုံးပြုနိုင်ရမည်။
 
 လက်ရှိ repository တွင် automated test project မပါသေးသောကြောင့် Release build နှင့် အထက်ပါ browser checks များသည် အဓိက verification workflow ဖြစ်သည်။
+
+
+## အဓိက ပံ့ပိုးသူများနှင့် မူရင်း Data
+
+App implementation: [Sann Lynn Htun](https://github.com/sannlynnhtun-coding)။ Worksheet Images ရဲ့ မူရင်းဖန်တီးသူနဲ့ ဖြန့်ဝေခွင့်ကို Repository မှာ သီးခြားမဖော်ပြထားသေးပါဘူး။
+
+## ကိုယ်တိုင် ပြန်ရေးကြည့်ချင်ရင်
+
+အပေါ်က App Workflow ကို အဆင့်လိုက် လေ့လာပြီး UI၊ Data နဲ့ State ကို ခွဲရေးကြည့်နိုင်ပါတယ်။ Bug Report၊ Documentation နဲ့ Implementation အသစ်တွေကို Issue / Pull Request နဲ့ ပံ့ပိုးနိုင်ပါတယ်။ မူရင်းပံ့ပိုးသူနဲ့ Data Credit ကို ဆက်လက်ထိန်းသိမ်းပါ။

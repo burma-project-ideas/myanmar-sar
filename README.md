@@ -1,3 +1,5 @@
+![Project logo](MyanmarZar/wwwroot/branding/icon-192.png)
+
 # Myanmar Sar — လက်ကလေး (မြန်မာဗျည်းရေးလေ့ကျင့်ခန်း)
 
 [Public Source Repository](https://github.com/burma-project-ideas/myanmar-sar) · [Live App](https://myanmarzar.vercel.app/)
@@ -184,3 +186,7 @@ After changing styles or utility classes, run `npm ci` and `npm run build:css` b
 ![Bencho-inspired desktop interface](screenshots/redesign-desktop.jpg)
 
 [Mobile preview](screenshots/redesign-mobile.jpg)
+
+## Brand assets
+
+The original monochrome mark matches the dark interface. Transparent SVG/PNG masters, a dark-on-light variant, favicon sizes (16/32/48), Apple touch icon (180), app icons (192/512), and a 1200×630 social image are generated from `wwwroot/branding/logo-master.svg`. Run `npm ci && npm run build:brand` to regenerate them. Existing font and data licenses remain unchanged.

@@ -175,10 +175,12 @@ App implementation: [Sann Lynn Htun](https://github.com/sannlynnhtun-coding)။ 
 
 ## UI Design Update
 
-The current interface follows [PrebuiltUI](https://prebuiltui.com/)'s visual direction: spacious white surfaces, subtle grid backgrounds, gradient headings, rounded cards, and pill controls. These patterns are implemented with CSS and native Blazor components; no React migration or new UI dependency is required. The earlier shared Blazor foundation remains in place.
+The interface follows [Bencho](https://bencho.dev/)'s dark visual direction: a black canvas, charcoal panels, white pill actions, compact headings, and restrained interaction feedback. The app stays in Blazor with native controls and a locally compiled Tailwind CSS stylesheet. No React component package, Bootstrap, Radzen, Font Awesome, or runtime Tailwind CDN is required.
 
-The redesign preserves application data, calculations, and browser storage keys. Responsive layouts and visible keyboard focus remain available. Myanmar text uses the self-hosted Padauk font; its license is retained in `wwwroot/fonts/OFL-Padauk.txt`.
+Application data and calculation/storage behavior are preserved. The Myanmar Padauk font and its license remain included. Keyboard focus, responsive reflow, and reduced-motion preferences are supported.
 
-![PrebuiltUI-inspired desktop interface](screenshots/redesign-desktop.jpg)
+After changing styles or utility classes, run `npm ci` and `npm run build:css` before the .NET publish command. Generated CSS is committed so existing static deployment workflows remain compatible.
+
+![Bencho-inspired desktop interface](screenshots/redesign-desktop.jpg)
 
 [Mobile preview](screenshots/redesign-mobile.jpg)
